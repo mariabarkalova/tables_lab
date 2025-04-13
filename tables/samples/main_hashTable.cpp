@@ -1,3 +1,4 @@
+/*
 #include<iostream>
 #include"../include/hashTable.h"
 
@@ -32,3 +33,4 @@ void main()
     ht.Insert(1222222, "Masha");
     ht.PrintTable();
 }
+*/

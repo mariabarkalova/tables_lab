@@ -1,5 +1,5 @@
-#include "../include/polinom.h"
-#include "../include/monom.h"
+#include "../../polinom/include/polinom.h"
+#include "../../polinom/include/monom.h"
 #include "../include/table.h"
 #include <iostream>
 using namespace std;

@@ -1,5 +1,7 @@
-#include "trees.h"
-#include <gtest.h>
+//#include "trees.h"
+//#include <gtest.h>
+#include"../../tables/include/trees.h"
+#include"../../tables/gtest/gtest.h"
 
 TEST(Tree, can_create_tree_with_root)
 {

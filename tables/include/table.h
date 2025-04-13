@@ -3,7 +3,7 @@
 #include <cctype>
 #include <sstream>
 #include<vector>
-#include "polinom.h"
+#include"../../polinom/include/polinom.h"
 using namespace std;
 
 template < typename tkey, typename tval>

@@ -1,6 +1,9 @@
+
 #include"../../tables/include/trees.h"
 //#include <gtest.h>
 #include"../../tables/gtest/gtest.h"
+using namespace TREE;
+
 TEST(avlTree, can_create_tree_with_root)
 {
     avlTree<int, int> t1(20);

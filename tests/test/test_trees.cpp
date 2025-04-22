@@ -2,7 +2,7 @@
 //#include <gtest.h>
 #include"../../tables/include/trees.h"
 #include"../../tables/gtest/gtest.h"
-
+using namespace TREE;
 TEST(Tree, can_create_tree_with_root)
 {
     Tree<int, int> t1(10);

@@ -1,6 +1,7 @@
 #include "../include/trees.h"
 #include <iostream>
 using namespace std;
+using namespace TREE;
 
 int main()
 {

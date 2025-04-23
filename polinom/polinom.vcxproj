@@ -127,6 +127,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="include\arifmetic.h" />
     <ClInclude Include="include\monom.h" />
     <ClInclude Include="include\polinom.h" />
   </ItemGroup>

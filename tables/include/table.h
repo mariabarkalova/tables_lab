@@ -140,16 +140,17 @@ public:
         return nullptr; // Не найдено
     }
 
-    void PrintAll() const 
+    void PrintAll() const
     { // Метод для печати всей таблицы
         Node* curr = first;
-        while (curr != nullptr) 
+        while (curr != nullptr)
         {
             cout << "Ключ: " << curr->key << ", Значение: ";
             curr->value.printPol();
             curr = curr->next;
         }
     }
+
     /*
     // Конструктор копирования
     ListTable(const ListTable<tkey, tval>& other) : first(nullptr), last(nullptr) {
@@ -195,8 +196,6 @@ public:
         return first;
     }
     */
-
-
 };
 
 

@@ -1,8 +1,35 @@
+#include <iostream>
 #include "../../polinom/include/polinom.h"
 #include "../../polinom/include/monom.h"
 #include "../include/table.h"
-#include <iostream>
+#include"../../polinom/include/arifmetic.h"
+
 using namespace std;
+/*
+void main()
+{
+	setlocale(LC_ALL, "Russian");
+
+	Calculator calc;
+	Polynom a("3x1y2z1+2x2y2z1");
+	Polynom b("3x1y2z1+2x2y2z3");
+
+	string s = "(a+2*b)";//Expression with Polynoms
+
+	calc.MassivLexem(s);
+	calc.Parser_Postfix();
+
+	Monom result_monom = calc.Arifmetic();
+	Polynom result;
+	stringstream ss;
+	ss << result_monom;
+	result = Polynom(ss.str());
+
+	cout << "Результат: ";
+	result.printPol();
+	cout << std::endl;
+}
+*/
 /*
 void main()
 {

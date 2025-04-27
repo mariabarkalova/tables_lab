@@ -1,289 +1,268 @@
+#pragma once
 #include <iostream>
-#include <sstream>
-
 using namespace std;
+#include <sstream>
+template <typename TKey, typename TVal>
+struct Node {
+    Node* left;
+    Node* right;
+    Node* parent;
+    pair <TKey, TVal> data;
+    Node(Node< TKey, TVal >* l = nullptr, Node< TKey, TVal >* r = nullptr, Node<TKey, TVal>* p = nullptr, pair <TKey, TVal> d = {}) {
+        data = d; left = l; right = r; parent = p;
+    }
+    Node(const Node<TKey, TVal>& node2) {
+        data = node2.data;
+        left = node2.left;
+        right = node2.right;
+        parent = node2.parent;
+    }
+    Node<TKey, TVal>& operator=(const Node<TKey, TVal>& node2) {
+        if (this != &node2) {
+            data = node2.data;
+            left = node2.left;
+            right = node2.right;
+            parent = node2.parent;
+        }
+        return *this;
+    }
+    bool operator==(const Node<TKey, TVal>& node2) const {
+        return (data == node2.data);
+    }
+    bool operator!=(const Node<TKey, TVal>& node2) const {
+        return (data != node2.data);
+    }
+};
 
-namespace TREE {
 
-    template <typename TKey, typename TVal>
-    class Node {
-    public:
-        Node* left;
-        Node* right;
-        Node* parent;
-        pair <TKey, TVal> data;
+template <typename TKey, typename TVal>
+struct avlNode : public Node<TKey, TVal> {
+    int height;
+    avlNode* left;
+    avlNode* right;
+    avlNode* parent;
+    avlNode(avlNode< TKey, TVal >* l = nullptr, avlNode< TKey, TVal >* r = nullptr, avlNode<TKey, TVal>* p = nullptr, pair <TKey, TVal> d = {}, int h = 0) {
+        data = d; left = l; right = r; parent = p; height = h;
+    }
+    avlNode(const avlNode<TKey, TVal>& node2) {
+        data = node2.data;
+        left = node2.left;
+        right = node2.right;
+        parent = node2.parent;
+        height = node2.height;
+    }
+};
+
+template <typename TKey, typename TVal, typename NodeType = Node<TKey,TVal>>
+class Tree {
+public:
+    NodeType* root;
+    Tree() : root(nullptr) {}
+    Tree(const TKey& k) { root = new NodeType(); root->data.first = k; };
+    ~Tree()
+    {
+        Delete_tree(root);
+    }
+    NodeType* Search(const TKey& k)
+    {
+        if (isEmpty()) {
+            throw ("Tree is empty");
+        }
+        // ГЁГ№ГҐГ¬ Г§ГўГҐГ­Г®
+        NodeType* curr = root;
+        NodeType* par = nullptr;
+        while (curr && curr->data.first != k) {
+            par = curr;
+            if (k < curr->data.first) {
+                curr = (curr->left);
+            }
+            else {
+                curr = (curr->right);
+            }
+        }
+        // Г­ГҐ Г­Г ГёГ«ГЁ
+        if (!curr) {
+            throw ("Node not found");
+        }
+        return curr;
+    }
+    void SetValue(const TKey& k, const TVal& v)
+    {
+        NodeType* curr = Search(k);
+        curr->data.second = v;
+    }
+    virtual void Walk(NodeType* r)
+    {
+        if (r!=nullptr) {
+            if (r->left)
+                Walk(r->left);
+            cout << "Key:" << r->data.first;
+            if (r->data.second)
+                cout << ", value:" << r->data.second;
+            if (r->right)
+                cout << ", right:" << r->right->data.first;
+            if (r->left)
+                cout << ", left:" << r->left->data.first;
+            if (r->parent)
+                cout << ", parent:" << r->parent->data.first;
+            cout << "\n";
+            if (r->right)
+                Walk(r->right);
+        }
+        else
+            throw ("Tree is empty");
+    }
+    virtual NodeType* Insert(NodeType* tmp, const TKey& k) {
+        if (isEmpty()) {
+            tmp = new NodeType();
+            tmp->data.first = k;
+            root = tmp;
+            return tmp;
+        }
+        else {
+            if (tmp->data.first == k) {
+                return tmp; //ГіГ¦ГҐ ГҐГ±ГІГј
+            }
+            if (k < tmp->data.first) {
+                if (tmp->left == nullptr) {
+                    tmp->left = new NodeType();
+                    tmp->left->parent = tmp;
+                    tmp->left->data.first = k;
+                }
+                else {
+                    Insert(tmp->left, k);
+                }
+            }
+            else {
+                if (tmp->right == nullptr) {
+                    tmp->right = new NodeType();
+                    tmp->right->parent = tmp;
+                    tmp->right->data.first = k;
+                }
+                else {
+                    Insert((tmp->right), k);
+                }
+            }
+            return tmp;
+        }
+    }
+    NodeType* Suce(NodeType* x)
+    {
+        if (x->right != nullptr)
+            return min(x->right);
+        else {
+            NodeType* tmp = x->parent;
+            while (tmp->data.first < x->data.first)
+            {
+                x = tmp; tmp = x->parent;
+            }
+            return tmp;
+        }
+    }
+    NodeType* Prev(NodeType* x) {
+        if (x->left) {
+            return max(x->left);
+        }
+
+        NodeType* current = x;
+        NodeType* parent = current->parent;
+
+        // ГЏГ°Г®ГµГ®Г¤ ГўГўГҐГ°Гµ ГЇГ® Г¤ГҐГ°ГҐГўГі, ГЇГ®ГЄГ  ГІГҐГЄГіГ№ГЁГ© ГіГ§ГҐГ« Г­ГҐ Г®ГЄГ Г¦ГҐГІГ±Гї ГЇГ°Г ГўГ»Г¬ Г°ГҐГЎГҐГ­ГЄГ®Г¬
+        while (parent && current == parent->left) {
+            current = parent;
+            parent = current->parent;
+        }
+
+        return parent;
+    }
+    bool isEmpty() const { return root == nullptr; };
+    virtual void Delete_node(const TKey& k)
+    {
+        if (isEmpty()) {
+            throw ("Tree is empty");
+        }
+        // ГЁГ№ГҐГ¬ Г§ГўГҐГ­Г®
+        NodeType* curr = Search(k);
+        NodeType* par = curr->parent;
         
-        Node(Node< TKey, TVal >* l = nullptr, Node< TKey, TVal >* r = nullptr, Node<TKey, TVal>* p = nullptr, pair <TKey, TVal> d = {}) {
-            data = d; left = l; right = r; parent = p;
-        }
-        Node(const Node<TKey, TVal>& node2) {
-            data = node2.data;
-            left = node2.left;
-            right = node2.right;
-            parent = node2.parent;
-        }
-        Node<TKey, TVal>& operator=(const Node<TKey, TVal>& node2) {
-            if (this != &node2) {
-                data = node2.data;
-                left = node2.left;
-                right = node2.right;
-                parent = node2.parent;
+        // Г­ГҐГІ ГЇГ®ГІГ®Г¬ГЄГ®Гў 
+        if (!curr->left && !curr->right) {
+            if (curr == root) {
+                root = nullptr;
             }
-            return *this;
-        }
-        bool operator==(const Node<TKey, TVal>& node2) const {
-            return (data == node2.data);
-        }
-        bool operator!=(const Node<TKey, TVal>& node2) const {
-            return (data != node2.data);
-        }
-    };
-
-
-    template <typename TKey, typename TVal>
-    class avlNode : public Node<TKey, TVal> {
-    public:
-        int height;
-        avlNode* left;
-        avlNode* right;
-        avlNode* parent;
-
-        avlNode(avlNode< TKey, TVal >* l = nullptr, avlNode< TKey, TVal >* r = nullptr, avlNode<TKey, TVal>* p = nullptr, pair <TKey, TVal> d = {}, int h = 0) :
-            Node<TKey, TVal>(l, r, p, d), height(0)
-        {
-        }
-
-        avlNode(const avlNode<TKey, TVal>& node2) {
-            data = node2.data;
-            left = node2.left;
-            right = node2.right;
-            parent = node2.parent;
-            height = node2.height;
-        }
-    };
-
-    template <typename TKey, typename TVal, typename NodeType = Node<TKey, TVal>>
-    class Tree {
-    public:
-        NodeType* root;
-        Tree() : root(nullptr) {}
-        Tree(const TKey& k) { root = new NodeType(); root->data.first = k; };
-        ~Tree()
-        {
-            Delete_tree(root);
-        }
-        NodeType* Search(const TKey& k)
-        {
-            if (isEmpty()) {
-                throw ("Tree is empty");
-            }
-            // ищем звено
-            NodeType* curr = root;
-            NodeType* par = nullptr;
-            while (curr && curr->data.first != k) {
-                par = curr;
-                if (k < curr->data.first) {
-                    curr = (curr->left);
-                }
-                else {
-                    curr = (curr->right);
-                }
-            }
-            // не нашли
-            if (!curr) {
-                throw ("Node not found");
-            }
-            return curr;
-        }
-        void SetValue(const TKey& k, const TVal& v)
-        {
-            NodeType* curr = Search(k);
-            curr->data.second = v;
-        }
-        virtual void Walk(NodeType* r)
-        {
-            if (r != nullptr) {
-                if (r->left)
-                    Walk(r->left);
-                cout << "Key:" << r->data.first;
-                if (r->data.second)
-                    cout << ", value:" << r->data.second;
-                if (r->right)
-                    cout << ", right:" << r->right->data.first;
-                if (r->left)
-                    cout << ", left:" << r->left->data.first;
-                if (r->parent)
-                    cout << ", parent:" << r->parent->data.first;
-                cout << "\n";
-                if (r->right)
-                    Walk(r->right);
-            }
-            else
-                throw ("Tree is empty");
-        }
-        virtual NodeType* Insert(NodeType* tmp, const TKey& k) {
-            if (isEmpty()) {
-                tmp = new NodeType();
-                tmp->data.first = k;
-                root = tmp;
-                return tmp;
+            else if (par->left == curr) {
+                par->left = nullptr;
             }
             else {
-                if (tmp->data.first == k) {
-                    return tmp; //уже есть
-                }
-                if (k < tmp->data.first) {
-                    if (tmp->left == nullptr) {
-                        tmp->left = new NodeType();
-                        tmp->left->parent = tmp;
-                        tmp->left->data.first = k;
-                    }
-                    else {
-                        Insert(tmp->left, k);
-                    }
-                }
-                else {
-                    if (tmp->right == nullptr) {
-                        tmp->right = new NodeType();
-                        tmp->right->parent = tmp;
-                        tmp->right->data.first = k;
-                    }
-                    else {
-                        Insert((tmp->right), k);
-                    }
-                }
-                return tmp;
+                par->right = nullptr;
             }
+            delete curr;
         }
-        NodeType* Suce(NodeType* x)
-        {
-            if (x->right != nullptr)
-                return min(x->right);
+        // 1 ГЇГ®ГІГ®Г¬Г®ГЄ
+        else if (!curr->left || !curr->right) {
+            NodeType* child = (curr->left) ? (curr->left) : (curr->right);
+
+            if (curr == root) {
+                root = child; // ГҐГ±Г«ГЁ ГіГ¤Г Г«ГїГҐГ¬ ГЄГ®Г°ГҐГ­Гј - Г®ГЎГ­Г®ГўГ«ГїГҐГ¬ ГҐГЈГ®
+            }
+            else if (par->left == curr) {
+                par->left = child;
+            }
             else {
-                NodeType* tmp = x->parent;
-                while (tmp->data.first < x->data.first)
-                {
-                    x = tmp; tmp = x->parent;
-                }
-                return tmp;
+                par->right = child;
             }
+            delete curr;
         }
-        NodeType* Prev(NodeType* x) {
-            if (x->left) {
-                return max(x->left);
-            }
+        // 2 ГЇГ®ГІГ®Г¬ГЄГ 
+        else {
+            // Г­Г ГЁГ¬ГҐГ­ГјГёГЁГ© Г±ГЇГ°Г ГўГ 
+            NodeType* succ = (curr->right);
+            NodeType* succPar = curr;
 
-            NodeType* current = x;
-            NodeType* parent = current->parent;
-
-            // Проход вверх по дереву, пока текущий узел не окажется правым ребенком
-            while (parent && current == parent->left) {
-                current = parent;
-                parent = current->parent;
+            while (succ->left) {
+                succPar = succ;
+                succ = (succ->left);
             }
-
-            return parent;
-        }
-        bool isEmpty() const { return root == nullptr; };
-        virtual void Delete_node(const TKey& k)
-        {
-            if (isEmpty()) {
-                throw ("Tree is empty");
+            curr->data.first = succ->data.first;
+            // ГіГ¤Г Г«ГїГҐГ¬ successor 
+            if (succPar->left == succ) {
+                succPar->left = succ->right;
             }
-            // ищем звено
-            NodeType* curr = root;
-            NodeType* par = nullptr;
-            while (curr && curr->data.first != k) {
-                par = curr;
-                if (k < curr->data.first) {
-                    curr = (curr->left);
-                }
-                else {
-                    curr = (curr->right);
-                }
-            }
-            // не нашли
-            if (!curr) {
-                throw ("Node not found");
-            }
-            // нет потомков 
-            if (!curr->left && !curr->right) {
-                if (curr == root) {
-                    root = nullptr;
-                }
-                else if (par->left == curr) {
-                    par->left = nullptr;
-                }
-                else {
-                    par->right = nullptr;
-                }
-                delete curr;
-            }
-            // 1 потомок
-            else if (!curr->left || !curr->right) {
-                NodeType* child = (curr->left) ? (curr->left) : (curr->right);
-
-                if (curr == root) {
-                    root = child; // если удаляем корень - обновляем его
-                }
-                else if (par->left == curr) {
-                    par->left = child;
-                }
-                else {
-                    par->right = child;
-                }
-                delete curr;
-            }
-            // 2 потомка
             else {
-                // наименьший справа
-                NodeType* succ = (curr->right);
-                NodeType* succPar = curr;
-
-                while (succ->left) {
-                    succPar = succ;
-                    succ = (succ->left);
-                }
-                curr->data.first = succ->data.first;
-                // удаляем successor 
-                if (succPar->left == succ) {
-                    succPar->left = succ->right;
-                }
-                else {
-                    succPar->right = succ->right;
-                }
-                delete succ;
+                succPar->right = succ->right;
             }
+            delete succ;
         }
-        virtual int GetHeight(NodeType* r) {
-            if (r) {
-                if (!(r->left) && !(r->right))
-                    return 0;
-                int lg = 0, rg = 0;
-                if (r->left)
-                    lg = GetHeight((r->left));
-                else lg = 0;
-                if (r->right)
-                    rg = GetHeight((r->right));
-                else rg = 0;
-                int k = std::max(lg, rg) + 1;
-                return k;
-            }
-            else
+    }
+    virtual int GetHeight(NodeType* r) {
+        if (r) {
+            if (!(r->left) && !(r->right))
                 return 0;
+            int lg = 0, rg = 0;
+            if (r->left)
+                lg = GetHeight((r->left));
+            else lg = 0;
+            if (r->right)
+                rg = GetHeight((r->right));
+            else rg = 0;
+            int k = std::max(lg, rg) + 1;
+            return k;
         }
-        NodeType* min(NodeType* x) {
-            while (x->left) {
-                x = x->left;
-            }
-            return x;
+        else
+            return 0;
+    }
+    NodeType* min(NodeType* x) {
+        while (x->left) {
+            x = x->left;
         }
-        NodeType* max(NodeType* x) {
-            while (x->right) {
-                x = x->right;
-            }
-            return x;
+        return x;
+    }
+    NodeType* max(NodeType* x) {
+        while (x->right) {
+            x = x->right;
         }
+        return x;
+    }
     protected:
         void Delete_tree(NodeType* tmp)
         {
@@ -294,252 +273,217 @@ namespace TREE {
                 delete tmp;
             }
         }
-    };
+};
 
-    template <typename TKey, typename TVal>
-    class avlTree : public Tree<TKey, TVal, avlNode<TKey, TVal>> {
-    public:
-        using NodeType = avlNode<TKey, TVal>;
-        avlTree() : Tree<TKey, TVal>() {}
-        avlTree(const TKey& k) {
-            this->root = new NodeType();
-            this->root->data.first = k;
+template <typename TKey, typename TVal>
+class avlTree : public Tree<TKey, TVal, avlNode<TKey, TVal>> {
+public:
+    using NodeType = avlNode<TKey, TVal>;
+    avlTree() : root(nullptr) {}
+    avlTree(const TKey& k) {
+        this->root = new NodeType();
+        this->root->data.first = k;
+    }
+    bool isEmpty() const { return root == nullptr; };
+    NodeType* Insert(NodeType* tmp, const TKey& k) override {
+        if (tmp == nullptr) {  // Г…Г±Г«ГЁ Г¤ГҐГ°ГҐГўГ® ГЇГіГ±ГІГ®ГҐ ГЁГ«ГЁ Г¤Г®ГёГ«ГЁ Г¤Г® Г¬ГҐГ±ГІГ  ГўГ±ГІГ ГўГЄГЁ
+            NodeType* newNode = new NodeType();
+            newNode->data.first = k;
+            return newNode;
         }
-        //bool isEmpty() const { Tree//return root == nullptr; };
-        NodeType* Insert(NodeType* tmp, const TKey& k)  override {
-            if (this->isEmpty()) {
-                tmp = new NodeType();
-                tmp->data.first = k;
-                return tmp;
+        if (k < tmp->data.first) {
+            tmp->left = Insert(tmp->left, k);
+            tmp->left->parent = tmp;
+        }
+        else if (k > tmp->data.first) {
+            tmp->right = Insert(tmp->right, k);
+            tmp->right->parent = tmp;
+        }
+        else {
+            return tmp; // Г“Г§ГҐГ« ГіГ¦ГҐ Г±ГіГ№ГҐГ±ГІГўГіГҐГІ
+        }
+        UpdateHeight(tmp);
+        return Balance(tmp); // ГЃГ Г«Г Г­Г±ГЁГ°ГіГҐГ¬ ГІГҐГЄГіГ№ГЁГ© ГіГ§ГҐГ«
+    }
+
+    void Delete_node(const TKey& k) override {
+        if (this->isEmpty()) {
+            throw ("Tree is empty");
+        }
+
+        NodeType* curr = Search(k);
+        NodeType* par = curr->parent;
+
+        // Гі ГіГ§Г«Г  Г­ГҐГІ ГЇГ®ГІГ®Г¬ГЄГ®Гў
+        if (!curr->left && !curr->right) {
+            if (curr == this->root) {
+                this->root = nullptr;
+            }
+            else if (par->left == curr) {
+                par->left = nullptr;
             }
             else {
-                if (tmp->data.first == k) {
-                    return tmp; //уже есть
-                }
-                if (k < tmp->data.first) {
-                    if (tmp->left == nullptr) {
-                        tmp->left = new NodeType();
-                        tmp->left->parent = tmp;
-                        tmp->left->data.first = k;
-                    }
-                    else {
-                        Insert(tmp->left, k);
-                    }
-                }
-                else {
-                    if (tmp->right == nullptr) {
-                        tmp->right = new NodeType();
-                        tmp->right->parent = tmp;
-                        tmp->right->data.first = k;
-                    }
-                    else {
-                        Insert(tmp->right, k);
-                    }
-                }
-                Balance((tmp));
-                return tmp;
+                par->right = nullptr;
             }
-            // Обновляем высоту и проверяем баланс
-            UpdateHeight(tmp);
-            return Balance(tmp);
+            delete curr;
         }
-
-        void Delete_node(const TKey& k) override {
-            if (this->isEmpty()) {
-                throw ("Tree is empty");
+        //Г®Г¤ГЁГ­ ГЇГ®ГІГ®Г¬Г®ГЄ
+        else if (!curr->left || !curr->right) {
+            NodeType* child = (curr->left) ? (curr->left) : (curr->right);
+            if (curr == this->root) {
+                this->root = child;
             }
-
-            // Ищем узел для удаления
-            NodeType* curr = this->root;
-            NodeType* par = nullptr;
-
-            while (curr && curr->data.first != k) {
-                par = curr;
-                if (k < curr->data.first) {
-                    curr = (curr->left);
-                }
-                else {
-                    curr = (curr->right);
-                }
-            }
-            //узел не найден
-            if (!curr) {
-                throw ("Node not found");
-            }
-            // у узла нет потомков
-            if (!curr->left && !curr->right) {
-                if (curr == this->root) {
-                    this->root = nullptr;
-                }
-                else if (par->left == curr) {
-                    par->left = nullptr;
-                }
-                else {
-                    par->right = nullptr;
-                }
-                delete curr;
-            }
-            //один потомок
-            else if (!curr->left || !curr->right) {
-                NodeType* child = (curr->left) ? (curr->left) : (curr->right);
-
-                if (curr == this->root) {
-                    this->root = child;
-                }
-                else if (par->left == curr) {
-                    par->left = child;
-                }
-                else {
-                    par->right = child;
-                }
-
-                if (child) {
-                    child->parent = par; // Обновляем родителя потомка
-                }
-
-                delete curr;
-            }
-            //два потомка
-            else {
-                // Находим наименьший узел в правом поддереве (successor)
-                NodeType* succ = (curr->right);
-                NodeType* succPar = curr;
-
-                while (succ->left) {
-                    succPar = succ;
-                    succ = (succ->left);
-                }
-                // Копируем данные из successor в текущий узел
-                curr->data = succ->data;
-                // Удаляем successor
-                if (succPar->left == succ) {
-                    succPar->left = (succ->right);
-                }
-                else {
-                    succPar->right = (succ->right);
-                }
-
-                if (succ->right) {
-                    (succ->right)->parent = succPar; // Обновляем родителя правого поддерева successor
-                }
-                delete succ;
-            }
-            if (par) {
-                UpdateHeight(par);
-                Balance(par);
-            }
-        }
-        NodeType* RotateLeft(NodeType* node) {
-            NodeType* right = (node->right);
-            node->right = right->left;
-            if (node->right != nullptr) {
-                node->right->parent = node;
-            }
-            right->parent = node->parent;
-            if (node->parent == nullptr) {
-                this->root = right;
-            }
-            else if (node == node->parent->left) {
-                node->parent->left = right;
+            else if (par->left == curr) {
+                par->left = child;
             }
             else {
-                node->parent->right = right;
+                par->right = child;
             }
-            right->left = node;
-            node->parent = right;
-            UpdateHeight(node);
-            UpdateHeight(right);
-            return right;
+            if (child) {
+                child->parent = par; // ГЋГЎГ­Г®ГўГ«ГїГҐГ¬ Г°Г®Г¤ГЁГІГҐГ«Гї ГЇГ®ГІГ®Г¬ГЄГ 
+            }
+            delete curr;
         }
-        NodeType* RotateRight(NodeType* node) {
-            NodeType* left = (node->left);
-            node->left = left->right;
-            if (node->left != nullptr) {
-                node->left->parent = node;
+        //Г¤ГўГ  ГЇГ®ГІГ®Г¬ГЄГ 
+        else {
+            // ГЌГ ГµГ®Г¤ГЁГ¬ Г­Г ГЁГ¬ГҐГ­ГјГёГЁГ© ГіГ§ГҐГ« Гў ГЇГ°Г ГўГ®Г¬ ГЇГ®Г¤Г¤ГҐГ°ГҐГўГҐ (successor)
+            NodeType* succ = (curr->right);
+            NodeType* succPar = curr;
+
+            while (succ->left) {
+                succPar = succ;
+                succ = (succ->left);
             }
-            left->parent = node->parent;
-            if (node->parent == nullptr) {
-                this->root = left;
-            }
-            else if (node == node->parent->right) {
-                node->parent->right = left;
+            // ГЉГ®ГЇГЁГ°ГіГҐГ¬ Г¤Г Г­Г­Г»ГҐ ГЁГ§ successor Гў ГІГҐГЄГіГ№ГЁГ© ГіГ§ГҐГ«
+            curr->data = succ->data;
+            // Г“Г¤Г Г«ГїГҐГ¬ successor
+            if (succPar->left == succ) {
+                succPar->left = (succ->right);
             }
             else {
-                node->parent->left = left;
+                succPar->right = (succ->right);
             }
-            left->right = node;
-            node->parent = left;
-            UpdateHeight(node);
-            UpdateHeight(left);
-            return left;
-        }
-        NodeType* Balance(NodeType* node) {
-            if (node == nullptr) {
-                return nullptr;
-            }
-            UpdateHeight(node);
-            int balance = GetBalance(node);
-            // Левый тяжелый
-            if (balance > 1) {
-                if (GetBalance((node->left)) >= 0) {
-                    return RotateRight(node);
-                }
-                else {
-                    node->left = RotateLeft((node->left));
-                    return RotateRight(node);
-                }
-            }
-            // Правый тяжелый
-            if (balance < -1) {
-                if (GetBalance((node->right)) <= 0) {
-                    return RotateLeft(node);
-                }
-                else {
-                    node->right = RotateRight((node->right));
-                    return RotateLeft(node);
-                }
-            }
-            return node;
-        }
-        void UpdateHeight(NodeType* node) {
-            if (node == nullptr) {
-                return;
-            }
-            int leftHeight = (node->left == nullptr) ? 0 : (node->left)->height;
-            int rightHeight = (node->right == nullptr) ? 0 : (node->right)->height;
-            node->height = (leftHeight > rightHeight ? leftHeight : rightHeight) + 1;
-        }
-        int GetBalance(NodeType* node) {
-            if (node == nullptr) {
-                return 0;
-            }
-            return GetHeight((node->left)) - GetHeight((node->right));
-        }
-        int GetHeight(NodeType* node)  override {
-            return node == nullptr ? 0 : node->height;
-        }
-        virtual void Walk(NodeType* r) override
-        {
-            if (r != nullptr) {
-                if (r->left)
-                    Walk(r->left);
-                cout << "Key:" << r->data.first;
-                cout << ", height:" << r->height;
-                if (r->data.second)
-                    cout << ", value:" << r->data.second;
-                if (r->right)
-                    cout << ", right:" << r->right->data.first;
-                if (r->left)
-                    cout << ", left:" << r->left->data.first;
-                if (r->parent)
-                    cout << ", parent:" << r->parent->data.first;
-                cout << "\n";
-                if (r->right)
-                    Walk(r->right);
-            }
-            else
-                throw ("Tree is empty");
-        }
-    };
 
-}
+            if (succ->right) {
+                (succ->right)->parent = succPar; // ГЋГЎГ­Г®ГўГ«ГїГҐГ¬ Г°Г®Г¤ГЁГІГҐГ«Гї ГЇГ°Г ГўГ®ГЈГ® ГЇГ®Г¤Г¤ГҐГ°ГҐГўГ  successor
+            }
+            delete succ;
+        }
+        while (par != nullptr) {
+            UpdateHeight(par);
+            par = Balance(par); 
+            par = par->parent;
+        }
+    }
+    NodeType* RotateLeft(NodeType* node) {
+        NodeType* right = (node->right);
+        node->right = right->left;
+        if (node->right != nullptr) {
+            node->right->parent = node;
+        }
+        right->parent = node->parent;
+        if (node->parent == nullptr) {
+            this->root = right;
+        }
+        else if (node == node->parent->left) {
+            node->parent->left = right;
+        }
+        else {
+            node->parent->right = right;
+        }
+        right->left = node;
+        node->parent = right;
+        UpdateHeight(node);
+        UpdateHeight(right);
+        return right;
+    }
+    NodeType* RotateRight(NodeType* node) {
+        NodeType* left = (node->left);
+        node->left = left->right;
+        if (node->left != nullptr) {
+            node->left->parent = node;
+        }
+        left->parent = node->parent;
+        if (node->parent == nullptr) {
+            this->root = left;
+        }
+        else if (node == node->parent->right) {
+            node->parent->right = left;
+        }
+        else {
+            node->parent->left = left;
+        }
+        left->right = node;
+        node->parent = left;
+        UpdateHeight(node);
+        UpdateHeight(left);
+        return left;
+    }
+    NodeType* Balance(NodeType* node) {
+        if (node == nullptr) {
+            return nullptr;
+        }
+        UpdateHeight(node);
+        int balance = GetBalance(node);
+        // Г‹ГҐГўГ»Г© ГІГїГ¦ГҐГ«Г»Г©
+        if (balance > 1) {
+            if (GetBalance((node->left)) >= 0) {
+                return RotateRight(node);
+            }
+            else {
+                node->left = RotateLeft((node->left));
+                return RotateRight(node);
+            }
+        }
+        // ГЏГ°Г ГўГ»Г© ГІГїГ¦ГҐГ«Г»Г©
+        if (balance < -1) {
+            if (GetBalance((node->right)) <= 0) {
+                return RotateLeft(node);
+            }
+            else {
+                node->right = RotateRight((node->right));
+                return RotateLeft(node);
+            }
+        }
+        return node;
+    }
+    void UpdateHeight(NodeType* node) {
+        if (node == nullptr) {
+            return;
+        }
+        int leftHeight = (node->left == nullptr) ? -1 : (node->left)->height;
+        int rightHeight = (node->right == nullptr) ? -1 : (node->right)->height;
+        node->height = (leftHeight > rightHeight ? leftHeight : rightHeight) + 1;
+    }
+    int GetBalance(NodeType* node) {
+        if (node == nullptr) {
+            return 0;
+        }
+        return GetHeight((node->left)) - GetHeight((node->right));
+    }
+    int GetHeight(NodeType* node)  override {
+        return node == nullptr ? -1 : node->height;
+    }
+    virtual void Walk(NodeType* r) override
+    {
+        if (r != nullptr) {
+            if (r->left)
+                Walk(r->left);
+            cout << "Key:" << r->data.first;
+            cout << ", height:" << r->height;
+            if (r->data.second)
+                cout << ", value:" << r->data.second;
+            if (r->right)
+                cout << ", right:" << r->right->data.first;
+            if (r->left)
+                cout << ", left:" << r->left->data.first;
+            if (r->parent)
+                cout << ", parent:" << r->parent->data.first;
+            cout << "\n";
+            if (r->right)
+                Walk(r->right);
+        }
+        else
+            throw ("Tree is empty");
+    }
+};

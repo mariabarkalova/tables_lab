@@ -1,7 +1,10 @@
-#pragma once
 #include <iostream>
-using namespace std;
 #include <sstream>
+
+using namespace std;
+
+namespace TREE {
+
 template <typename TKey, typename TVal>
 struct Node {
     Node* left;
@@ -487,3 +490,4 @@ public:
             throw ("Tree is empty");
     }
 };
+}

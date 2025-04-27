@@ -5,58 +5,64 @@ using namespace std;
 
 namespace TREE {
 
-template <typename TKey, typename TVal>
-struct Node {
-    Node* left;
-    Node* right;
-    Node* parent;
-    pair <TKey, TVal> data;
-    Node(Node< TKey, TVal >* l = nullptr, Node< TKey, TVal >* r = nullptr, Node<TKey, TVal>* p = nullptr, pair <TKey, TVal> d = {}) {
-        data = d; left = l; right = r; parent = p;
-    }
-    Node(const Node<TKey, TVal>& node2) {
-        data = node2.data;
-        left = node2.left;
-        right = node2.right;
-        parent = node2.parent;
-    }
-    Node<TKey, TVal>& operator=(const Node<TKey, TVal>& node2) {
-        if (this != &node2) {
+    template <typename TKey, typename TVal>
+    class Node {
+    public:
+        Node* left;
+        Node* right;
+        Node* parent;
+        pair <TKey, TVal> data;
+        
+        Node(Node< TKey, TVal >* l = nullptr, Node< TKey, TVal >* r = nullptr, Node<TKey, TVal>* p = nullptr, pair <TKey, TVal> d = {}) {
+            data = d; left = l; right = r; parent = p;
+        }
+        Node(const Node<TKey, TVal>& node2) {
             data = node2.data;
             left = node2.left;
             right = node2.right;
             parent = node2.parent;
         }
-        return *this;
-    }
-    bool operator==(const Node<TKey, TVal>& node2) const {
-        return (data == node2.data);
-    }
-    bool operator!=(const Node<TKey, TVal>& node2) const {
-        return (data != node2.data);
-    }
-};
+        Node<TKey, TVal>& operator=(const Node<TKey, TVal>& node2) {
+            if (this != &node2) {
+                data = node2.data;
+                left = node2.left;
+                right = node2.right;
+                parent = node2.parent;
+            }
+            return *this;
+        }
+        bool operator==(const Node<TKey, TVal>& node2) const {
+            return (data == node2.data);
+        }
+        bool operator!=(const Node<TKey, TVal>& node2) const {
+            return (data != node2.data);
+        }
+    };
 
 
-template <typename TKey, typename TVal>
-struct avlNode : public Node<TKey, TVal> {
-    int height;
-    avlNode* left;
-    avlNode* right;
-    avlNode* parent;
-    avlNode(avlNode< TKey, TVal >* l = nullptr, avlNode< TKey, TVal >* r = nullptr, avlNode<TKey, TVal>* p = nullptr, pair <TKey, TVal> d = {}, int h = 0) {
-        data = d; left = l; right = r; parent = p; height = h;
-    }
-    avlNode(const avlNode<TKey, TVal>& node2) {
-        data = node2.data;
-        left = node2.left;
-        right = node2.right;
-        parent = node2.parent;
-        height = node2.height;
-    }
-};
+    template <typename TKey, typename TVal>
+    class avlNode : public Node<TKey, TVal> {
+    public:
+        int height;
+        avlNode* left;
+        avlNode* right;
+        avlNode* parent;
 
-template <typename TKey, typename TVal, typename NodeType = Node<TKey,TVal>>
+        avlNode(avlNode< TKey, TVal >* l = nullptr, avlNode< TKey, TVal >* r = nullptr, avlNode<TKey, TVal>* p = nullptr, pair <TKey, TVal> d = {}, int h = 0) :
+            Node<TKey, TVal>(l, r, p, d), height(0)
+        {
+        }
+
+        avlNode(const avlNode<TKey, TVal>& node2) {
+            data = node2.data;
+            left = node2.left;
+            right = node2.right;
+            parent = node2.parent;
+            height = node2.height;
+        }
+    };
+
+template <typename TKey, typename TVal, typename NodeType = Node<TKey, TVal>>
 class Tree {
 public:
     NodeType* root;
@@ -282,12 +288,12 @@ template <typename TKey, typename TVal>
 class avlTree : public Tree<TKey, TVal, avlNode<TKey, TVal>> {
 public:
     using NodeType = avlNode<TKey, TVal>;
-    avlTree() : root(nullptr) {}
+    avlTree() : Tree<TKey, TVal>() {}
     avlTree(const TKey& k) {
         this->root = new NodeType();
         this->root->data.first = k;
     }
-    bool isEmpty() const { return root == nullptr; };
+    //bool isEmpty() const { Tree//return root == nullptr; };
     NodeType* Insert(NodeType* tmp, const TKey& k) override {
         if (tmp == nullptr) {  // Åñëè äåðåâî ïóñòîå èëè äîøëè äî ìåñòà âñòàâêè
             NodeType* newNode = new NodeType();

@@ -3,8 +3,7 @@
 #include"../../tables/include/trees.h"
 #include"../../tables/gtest/gtest.h"
 using namespace TREE;
-#include "trees.h"
-#include <gtest.h>
+
 
 // test fixture
 class tmpTree : public ::testing::Test {

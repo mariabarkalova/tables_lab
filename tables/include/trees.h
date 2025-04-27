@@ -1,68 +1,59 @@
+#pragma once
 #include <iostream>
-#include <sstream>
-
 using namespace std;
-
-namespace TREE {
-
-    template <typename TKey, typename TVal>
-    class Node {
-    public:
-        Node* left;
-        Node* right;
-        Node* parent;
-        pair <TKey, TVal> data;
-        
-        Node(Node< TKey, TVal >* l = nullptr, Node< TKey, TVal >* r = nullptr, Node<TKey, TVal>* p = nullptr, pair <TKey, TVal> d = {}) {
-            data = d; left = l; right = r; parent = p;
-        }
-        Node(const Node<TKey, TVal>& node2) {
+#include <sstream>
+template <typename TKey, typename TVal>
+struct Node {
+    Node* left;
+    Node* right;
+    Node* parent;
+    pair <TKey, TVal> data;
+    Node(Node< TKey, TVal >* l = nullptr, Node< TKey, TVal >* r = nullptr, Node<TKey, TVal>* p = nullptr, pair <TKey, TVal> d = {}) {
+        data = d; left = l; right = r; parent = p;
+    }
+    Node(const Node<TKey, TVal>& node2) {
+        data = node2.data;
+        left = node2.left;
+        right = node2.right;
+        parent = node2.parent;
+    }
+    Node<TKey, TVal>& operator=(const Node<TKey, TVal>& node2) {
+        if (this != &node2) {
             data = node2.data;
             left = node2.left;
             right = node2.right;
             parent = node2.parent;
         }
-        Node<TKey, TVal>& operator=(const Node<TKey, TVal>& node2) {
-            if (this != &node2) {
-                data = node2.data;
-                left = node2.left;
-                right = node2.right;
-                parent = node2.parent;
-            }
-            return *this;
-        }
-        bool operator==(const Node<TKey, TVal>& node2) const {
-            return (data == node2.data);
-        }
-        bool operator!=(const Node<TKey, TVal>& node2) const {
-            return (data != node2.data);
-        }
-    };
+        return *this;
+    }
+    bool operator==(const Node<TKey, TVal>& node2) const {
+        return (data == node2.data);
+    }
+    bool operator!=(const Node<TKey, TVal>& node2) const {
+        return (data != node2.data);
+    }
+};
 
 
-    template <typename TKey, typename TVal>
-    class avlNode : public Node<TKey, TVal> {
-    public:
-        int height;
-        avlNode* left;
-        avlNode* right;
-        avlNode* parent;
+template <typename TKey, typename TVal>
+struct avlNode : public Node<TKey, TVal> {
+    int height;
+    avlNode* left;
+    avlNode* right;
+    avlNode* parent;
+    avlNode(avlNode< TKey, TVal >* l = nullptr, avlNode< TKey, TVal >* r = nullptr, avlNode<TKey, TVal>* p = nullptr, pair <TKey, TVal> d = {}, int h = 0) {
+        data = d; left = l; right = r; parent = p; height = h;
+    }
+    avlNode(const avlNode<TKey, TVal>& node2) {
+        data = node2.data;
+        left = node2.left;
+        right = node2.right;
+        parent = node2.parent;
+        height = node2.height;
+    }
+};
 
-        avlNode(avlNode< TKey, TVal >* l = nullptr, avlNode< TKey, TVal >* r = nullptr, avlNode<TKey, TVal>* p = nullptr, pair <TKey, TVal> d = {}, int h = 0) :
-            Node<TKey, TVal>(l, r, p, d), height(0)
-        {
-        }
-
-        avlNode(const avlNode<TKey, TVal>& node2) {
-            data = node2.data;
-            left = node2.left;
-            right = node2.right;
-            parent = node2.parent;
-            height = node2.height;
-        }
-    };
-
-template <typename TKey, typename TVal, typename NodeType = Node<TKey, TVal>>
+template <typename TKey, typename TVal, typename NodeType = Node<TKey,TVal>>
 class Tree {
 public:
     NodeType* root;
@@ -72,12 +63,12 @@ public:
     {
         Delete_tree(root);
     }
-    NodeType* Search(const TKey& k)
+    virtual NodeType* Search(const TKey& k)
     {
         if (isEmpty()) {
             throw ("Tree is empty");
         }
-        // èùåì çâåíî
+        // ищем звено
         NodeType* curr = root;
         NodeType* par = nullptr;
         while (curr && curr->data.first != k) {
@@ -89,7 +80,7 @@ public:
                 curr = (curr->right);
             }
         }
-        // íå íàøëè
+        // не нашли
         if (!curr) {
             throw ("Node not found");
         }
@@ -130,7 +121,7 @@ public:
         }
         else {
             if (tmp->data.first == k) {
-                return tmp; //óæå åñòü
+                return tmp; //уже есть
             }
             if (k < tmp->data.first) {
                 if (tmp->left == nullptr) {
@@ -176,7 +167,7 @@ public:
         NodeType* current = x;
         NodeType* parent = current->parent;
 
-        // Ïðîõîä ââåðõ ïî äåðåâó, ïîêà òåêóùèé óçåë íå îêàæåòñÿ ïðàâûì ðåáåíêîì
+        // Проход вверх по дереву, пока текущий узел не окажется правым ребенком
         while (parent && current == parent->left) {
             current = parent;
             parent = current->parent;
@@ -190,11 +181,11 @@ public:
         if (isEmpty()) {
             throw ("Tree is empty");
         }
-        // èùåì çâåíî
+        // ищем звено
         NodeType* curr = Search(k);
         NodeType* par = curr->parent;
         
-        // íåò ïîòîìêîâ 
+        // нет потомков 
         if (!curr->left && !curr->right) {
             if (curr == root) {
                 root = nullptr;
@@ -207,12 +198,12 @@ public:
             }
             delete curr;
         }
-        // 1 ïîòîìîê
+        // 1 потомок
         else if (!curr->left || !curr->right) {
             NodeType* child = (curr->left) ? (curr->left) : (curr->right);
 
             if (curr == root) {
-                root = child; // åñëè óäàëÿåì êîðåíü - îáíîâëÿåì åãî
+                root = child; // если удаляем корень - обновляем его
             }
             else if (par->left == curr) {
                 par->left = child;
@@ -222,9 +213,9 @@ public:
             }
             delete curr;
         }
-        // 2 ïîòîìêà
+        // 2 потомка
         else {
-            // íàèìåíüøèé ñïðàâà
+            // наименьший справа
             NodeType* succ = (curr->right);
             NodeType* succPar = curr;
 
@@ -233,7 +224,7 @@ public:
                 succ = (succ->left);
             }
             curr->data.first = succ->data.first;
-            // óäàëÿåì successor 
+            // удаляем successor 
             if (succPar->left == succ) {
                 succPar->left = succ->right;
             }
@@ -288,14 +279,14 @@ template <typename TKey, typename TVal>
 class avlTree : public Tree<TKey, TVal, avlNode<TKey, TVal>> {
 public:
     using NodeType = avlNode<TKey, TVal>;
-    avlTree() : Tree<TKey, TVal>() {}
+    avlTree() : root(nullptr) {}
     avlTree(const TKey& k) {
         this->root = new NodeType();
         this->root->data.first = k;
     }
-    //bool isEmpty() const { Tree//return root == nullptr; };
+    bool isEmpty() const { return root == nullptr; };
     NodeType* Insert(NodeType* tmp, const TKey& k) override {
-        if (tmp == nullptr) {  // Åñëè äåðåâî ïóñòîå èëè äîøëè äî ìåñòà âñòàâêè
+        if (tmp == nullptr) {  // Если дерево пустое или дошли до места вставки
             NodeType* newNode = new NodeType();
             newNode->data.first = k;
             return newNode;
@@ -309,10 +300,10 @@ public:
             tmp->right->parent = tmp;
         }
         else {
-            return tmp; // Óçåë óæå ñóùåñòâóåò
+            return tmp; // Узел уже существует
         }
         UpdateHeight(tmp);
-        return Balance(tmp); // Áàëàíñèðóåì òåêóùèé óçåë
+        return Balance(tmp); // Балансируем текущий узел
     }
 
     void Delete_node(const TKey& k) override {
@@ -323,7 +314,7 @@ public:
         NodeType* curr = Search(k);
         NodeType* par = curr->parent;
 
-        // ó óçëà íåò ïîòîìêîâ
+        // у узла нет потомков
         if (!curr->left && !curr->right) {
             if (curr == this->root) {
                 this->root = nullptr;
@@ -336,7 +327,7 @@ public:
             }
             delete curr;
         }
-        //îäèí ïîòîìîê
+        //один потомок
         else if (!curr->left || !curr->right) {
             NodeType* child = (curr->left) ? (curr->left) : (curr->right);
             if (curr == this->root) {
@@ -349,13 +340,13 @@ public:
                 par->right = child;
             }
             if (child) {
-                child->parent = par; // Îáíîâëÿåì ðîäèòåëÿ ïîòîìêà
+                child->parent = par; // Обновляем родителя потомка
             }
             delete curr;
         }
-        //äâà ïîòîìêà
+        //два потомка
         else {
-            // Íàõîäèì íàèìåíüøèé óçåë â ïðàâîì ïîääåðåâå (successor)
+            // Находим наименьший узел в правом поддереве (successor)
             NodeType* succ = (curr->right);
             NodeType* succPar = curr;
 
@@ -363,9 +354,9 @@ public:
                 succPar = succ;
                 succ = (succ->left);
             }
-            // Êîïèðóåì äàííûå èç successor â òåêóùèé óçåë
+            // Копируем данные из successor в текущий узел
             curr->data = succ->data;
-            // Óäàëÿåì successor
+            // Удаляем successor
             if (succPar->left == succ) {
                 succPar->left = (succ->right);
             }
@@ -374,7 +365,7 @@ public:
             }
 
             if (succ->right) {
-                (succ->right)->parent = succPar; // Îáíîâëÿåì ðîäèòåëÿ ïðàâîãî ïîääåðåâà successor
+                (succ->right)->parent = succPar; // Обновляем родителя правого поддерева successor
             }
             delete succ;
         }
@@ -434,7 +425,7 @@ public:
         }
         UpdateHeight(node);
         int balance = GetBalance(node);
-        // Ëåâûé òÿæåëûé
+        // Левый тяжелый
         if (balance > 1) {
             if (GetBalance((node->left)) >= 0) {
                 return RotateRight(node);
@@ -444,7 +435,7 @@ public:
                 return RotateRight(node);
             }
         }
-        // Ïðàâûé òÿæåëûé
+        // Правый тяжелый
         if (balance < -1) {
             if (GetBalance((node->right)) <= 0) {
                 return RotateLeft(node);
@@ -496,4 +487,3 @@ public:
             throw ("Tree is empty");
     }
 };
-}

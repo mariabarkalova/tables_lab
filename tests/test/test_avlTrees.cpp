@@ -1,5 +1,8 @@
-#include "trees.h"
-#include <gtest.h>
+#include"../../tables/include/trees.h"
+//#include <gtest.h>
+#include"../../tables/gtest/gtest.h"
+using namespace TREE;
+
 
 // test fixture
 class tmpAvl : public ::testing::Test {

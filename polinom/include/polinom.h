@@ -12,7 +12,9 @@ struct Node
 {
     T value;
     Node* next;
-    Node(T val1, Node* p) : value(val1), next(p) {}
+    //Node(T val1, Node* p) : value(val1), next(p) {}
+    Node(const T& value) : value(value), next(nullptr) {}
+    Node(T val, Node* nextNode) : value(val), next(nextNode) {}
 };
 
 template <class T>
@@ -106,6 +108,7 @@ public:
         }
     }
 
+
     void Insert(T value) {  // добавление элемента в упор€доченном пор€дке
         Node<T>* p = new Node<T>(value, nullptr);
         if (first == nullptr) {  // ≈сли список пуст
@@ -156,14 +159,42 @@ public:
     Node<T>* getFirst() {
         return first;
     }
+    void insertAfter(Node<T>* prevNode, const T& value) {
+        Node<T>* newNode = new Node<T>(value);
+        if (prevNode == nullptr) { // вставка в начало
+            newNode->next = first;
+            first = newNode;
+        }
+        else {
+            newNode->next = prevNode->next;
+            prevNode->next = newNode;
+        }
+    }
+    void deleteNode(Node<T>* prev, Node<T>* curr) {
+        if (curr == nullptr) return;
+        if (prev == nullptr) {
+            first = curr->next;
+        }
+        else {
+            prev->next = curr->next;
+        }
+        delete curr;
+    }
+
+
 };
 
 
 class Polynom
 {
-    List <Monom> p;
+     //List <Monom> p;
 
 public:
+    List<Monom> p;
+
+    List<Monom>& getMonomList() {
+        return p;
+    }
     Polynom() {}
 
     Polynom(const string& s) {  //3x1y2z1 + 2x2y2z1
@@ -255,8 +286,40 @@ public:
         }
         return res;
     }
-    
-    
+
+    void addMonom(const Monom& m) {
+        Node<Monom>* curr = p.getFirst();
+        Node<Monom>* prev = nullptr;
+
+        while (curr != nullptr && curr->value < m) {
+            prev = curr;
+            curr = curr->next;
+        }
+
+        // —овпала ли степень
+        if (curr != nullptr && curr->value == m) {
+            curr->value.coeff += m.coeff;
+            if (curr->value.coeff == 0) {
+                p.deleteNode(prev, curr);
+            }
+        }
+        else {
+            p.insertAfter(prev, m);
+        }
+    }
+
+
+    /*Polynom operator*(double scalar) const {
+        Polynom res;
+        Node<Monom>* current = p.getFirst();
+        while (current != nullptr) {
+            Monom newMonom = current->value * scalar; 
+
+            res.p.Insert(newMonom);
+            current = current->next;
+        }
+        return res;
+    }*/
 
     //старое сложение полиномов( дл€ неупор€доченного списка)
     /*Polynom operator+(Polynom& other) {  //  "3x1y2z1 + 2x2y2z1" + "3x1y2z1 + 2x2y2z3"

@@ -5,31 +5,20 @@
 #include"../../polinom/include/arifmetic.h"
 
 using namespace std;
-/*
-void main()
-{
+int main() {
 	setlocale(LC_ALL, "Russian");
+	string expression = "((3x1y2z1+2x2y2z1)*5-(2x1y2z1+1))";
 
-	Calculator calc;
-	Polynom a("3x1y2z1+2x2y2z1");
-	Polynom b("3x1y2z1+2x2y2z3");
+	Parser parser(expression);
+	parser.Parser_Postfix();
+	//parser.printPostfix();
 
-	string s = "(a+2*b)";//Expression with Polynoms
-
-	calc.MassivLexem(s);
-	calc.Parser_Postfix();
-
-	Monom result_monom = calc.Arifmetic();
-	Polynom result;
-	stringstream ss;
-	ss << result_monom;
-	result = Polynom(ss.str());
-
+	Polynom result = parser.Arifmetic();
 	cout << "Результат: ";
 	result.printPol();
-	cout << std::endl;
+
+	return 0;
 }
-*/
 /*
 void main()
 {

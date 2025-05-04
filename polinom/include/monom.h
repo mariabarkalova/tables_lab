@@ -6,65 +6,14 @@ using namespace std;
 
 class Monom
 {
-	double coeff;
+	//double coeff;
 	//int pow; 
     int pow_x;
     int pow_y;
     int pow_z;
 public:
-    Monom(double c, int px = 0, int py = 0, int pz = 0) : coeff(c), pow_x(px), pow_y(py), pow_z(pz) {} // Конструктор по числам
+    double coeff;
 
-    Monom(const string& s) : coeff(1.0), pow_x(0), pow_y(0), pow_z(0) {
-        size_t i = 0;
-        std::string numStr;
-
-        // Get the coefficient
-        while (i < s.length() && isdigit(s[i])) {
-            numStr += s[i];
-            i++;
-        }
-
-        if (!numStr.empty()) {
-            coeff = stod(numStr);
-        }
-        else {
-            coeff = 1.0;
-        }
-
-        // Parse the variables and their powers
-        while (i < s.length()) {
-            char var = s[i++]; // Get the variable
-            string powStr;
-            int pow = 1;       // Default exponent is 1 if not provided
-
-            // Get the exponent
-            while (i < s.length() && isdigit(s[i])) {
-                powStr += s[i];
-                i++;
-            }
-
-            if (!powStr.empty()) {
-                pow = stoi(powStr);
-            }
-
-            switch (var) {
-            case 'x':
-                pow_x = pow;
-                break;
-            case 'y':
-                pow_y = pow;
-                break;
-            case 'z':
-                pow_z = pow;
-                break;
-            default:
-                throw runtime_error("Неверный символ переменной: " + string(1, var));
-                break;
-            }
-        }
-    }
-
-    /*
     Monom(double c, int px = 0, int py = 0, int pz = 0) : coeff(c), pow_x(px), pow_y(py), pow_z(pz) {} // Конструктор по числам 
   
     Monom(const string& s) : coeff(0), pow_x(0), pow_y(0), pow_z(0) {   // Конструктор по строке ("3x1y2z1")
@@ -98,7 +47,7 @@ public:
             }
         }
     }
-    */
+    
     int getPowX() 
     { 
         return pow_x; 
@@ -131,6 +80,10 @@ public:
 		return (coeff == m.coeff && pow_x == m.pow_x && pow_y == m.pow_y && pow_z == m.pow_z);
 	}
 
+    Monom operator*(double scalar) const {
+        return Monom(coeff * scalar, pow_x, pow_y, pow_z);
+    }
+
     // Сравнение по сумме степеней, затем по коэффициентам
     bool operator<(const Monom& m) const {
         if (pow_x + pow_y + pow_z != m.pow_x + m.pow_y + m.pow_z) {
@@ -140,19 +93,6 @@ public:
         return coeff < m.coeff;
     }
 
-    /*bool operator<(const Monom& m) const {    //("3x1y2z1 + 2x2y2z1")
-        if (pow_x != m.pow_x) {
-            return pow_x < m.pow_x; 
-        }
-        if (pow_y != m.pow_y) {
-            return pow_y < m.pow_y; 
-        }
-        if (pow_z != m.pow_z) {
-            return pow_z < m.pow_z; 
-        }
-        return coeff < m.coeff; // Наконец, сравниваем коэффициенты
-    }*/
-
     friend ostream& operator<<(ostream& ostr, const Monom& m)
     {
         ostr << "Коэффициент: " << m.coeff << ' ';
@@ -160,5 +100,17 @@ public:
         ostr << m.pow_x << m.pow_y << m.pow_z << endl;
         return ostr;
     }
+    /*bool operator<(const Monom& m) const {    //("3x1y2z1 + 2x2y2z1")
+        if (pow_x != m.pow_x) {
+            return pow_x < m.pow_x;
+        }
+        if (pow_y != m.pow_y) {
+            return pow_y < m.pow_y;
+        }
+        if (pow_z != m.pow_z) {
+            return pow_z < m.pow_z;
+        }
+        return coeff < m.coeff; // Наконец, сравниваем коэффициенты
+    }*/
 };
 

@@ -32,6 +32,7 @@ class ListTable : public TableBase<tkey, tval>
     };
     Node* first; //first ук-ль на первое звено
     Node* last;
+    size_t _size;
 public:
     ListTable() : first(nullptr) {}
 
@@ -150,7 +151,9 @@ public:
             curr = curr->next;
         }
     }
+    size_t size() const { return _size; }
 
+    bool isEmpty() const { return _size == 0; }
     /*
     //  онструктор копировани€
     ListTable(const ListTable<tkey, tval>& other) : first(nullptr), last(nullptr) {

@@ -100,6 +100,38 @@ public:
 
     }
 
+    size_t Find(const tkey& key) {
+        size_t ind = hasher(key) % capacity;
+        size_t initial_ind = ind;
+        size_t probes = 0;
+
+        while (probes <= capacity) {
+            if (table[ind].occupied && table[ind].key == key) {
+                return ind;
+            }
+
+            if (!table[ind].occupied && !table[ind].deleted) {
+                return (size_t)-1; // Key not found
+            }
+
+            ind = rehasher(key, ++probes, capacity) % capacity;
+            if (ind == initial_ind && probes > 1) {
+                return (size_t)-1;
+            }
+        }
+        return (size_t)-1;
+    }
+
+    tval* Search(const tkey& key) {
+        size_t index = Find(key);
+        if (index != (size_t)-1) {
+            return &table[index].value; // Возвращаем указатель на значение
+        }
+        else {
+            return nullptr; // Key не найден
+        }
+    }
+    /*
     size_t Find(const tkey& key)
     {
         size_t ind = hasher(key) % capacity;
@@ -119,18 +151,13 @@ public:
             }
 
             ind = rehasher(key, ++probes, capacity) % capacity;
-            /*if (probes > capacity) {
-                cout << "Error: Reached maximum probes, key not in table (likely)." << endl;
-                return -1;
-            }*/
-
             if (ind == initial_ind && probes > 1) {
                 return -1; //Прошли всю таблицу
             }
         }
         cout << "Достигнуто максимальное количество проб, ключа нет в таблице(вероятно)." << endl;
         return -1;
-    }
+    }*/
 
     bool Delete(const tkey& key) {
         size_t num = Find(key);
@@ -162,13 +189,7 @@ public:
         }
         cout << "Размер: " << size << "/" << capacity << endl;
     }
-
-
+    size_t get_size() const {
+        return size;
+    }
 };
-
-
-
-/*size_t default_rehash(tkey key, size_t i, size_t cap)   // Состояние ячейки (занята, свободна, удалена)
-{
-    return (hasher(key) + i * (1 + hasher(key) % (cap - 1))) % cap;
-}*/
